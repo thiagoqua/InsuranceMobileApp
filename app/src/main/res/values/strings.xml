@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">InsurancesApp</string>
+    <string name="user_logged">very_private_and_complicated_user_logged_key</string>
+</resources>
