@@ -1,4 +1,4 @@
-package com.thiago.online.insurancesapp.models
+package com.thiago.online.insurancesapp.data.models
 
 import java.time.LocalDateTime
 
@@ -20,7 +20,7 @@ data class Insured(
     val status:String,
     val paymentExpiration:Short,
     val phones:Array<Phone>,
-    val addressNavigation:Address,
-    val companyNavigation:Company,
-    val producerNavigation:Producer,
+    val addressNavigation: Address,
+    val companyNavigation: Company,
+    val producerNavigation: Producer,
 );

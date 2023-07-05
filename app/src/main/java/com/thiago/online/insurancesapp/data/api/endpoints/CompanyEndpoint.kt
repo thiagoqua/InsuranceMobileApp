@@ -1,6 +1,6 @@
-package com.thiago.online.insurancesapp.api.endpoints
+package com.thiago.online.insurancesapp.data.api.endpoints
 
-import com.thiago.online.insurancesapp.models.Company
+import com.thiago.online.insurancesapp.data.models.Company
 import retrofit2.Call
 import retrofit2.http.GET
 

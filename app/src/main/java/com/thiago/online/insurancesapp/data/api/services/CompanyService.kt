@@ -1,8 +1,7 @@
-package com.thiago.online.insurancesapp.api.services
+package com.thiago.online.insurancesapp.data.api.services
 
-import com.thiago.online.insurancesapp.api.RetrofitInstance
-import com.thiago.online.insurancesapp.models.Admin
-import com.thiago.online.insurancesapp.models.Company
+import com.thiago.online.insurancesapp.data.api.RetrofitInstance
+import com.thiago.online.insurancesapp.data.models.Company
 import retrofit2.Response
 
 class CompanyService {

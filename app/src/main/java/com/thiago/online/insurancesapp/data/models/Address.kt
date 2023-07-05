@@ -1,4 +1,4 @@
-package com.thiago.online.insurancesapp.models
+package com.thiago.online.insurancesapp.data.models
 
 data class Address(
     val id:Long,
