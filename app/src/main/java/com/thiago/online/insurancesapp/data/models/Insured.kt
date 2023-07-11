@@ -9,7 +9,7 @@ data class Insured(
     val license:String,
     val folder:Int,
     val life:String,
-    val born:LocalDateTime,
+    val born:String,
     val address:Long,
     val dni:String,
     val cuit:String,
