@@ -15,6 +15,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.thiago.online.insurancesapp.data.models.Insured
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
 import com.thiago.online.insurancesapp.viewmodel.InsuredsViewModel
@@ -25,7 +26,7 @@ fun InsuredsScreen(
     getUserLogged:() -> String?,
     goToLogin:() -> Unit
 ) {
-    val viewModel:InsuredsViewModel = InsuredsViewModel(getUserLogged,goToLogin);
+    val viewModel:InsuredsViewModel = hiltViewModel<InsuredsViewModel>();
 
     InsurancesAppTheme {
         Surface(

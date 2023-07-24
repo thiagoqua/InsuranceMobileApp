@@ -11,15 +11,24 @@ import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.thiago.online.insurancesapp.R
 import com.thiago.online.insurancesapp.data.api.services.AuthService
+import com.thiago.online.insurancesapp.data.models.Admin
 import com.thiago.online.insurancesapp.data.models.LogInRequest
+import com.thiago.online.insurancesapp.data.repositories.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import javax.inject.Inject
 
-class LoginViewModel(val storeUser:(String) -> Unit):ViewModel() {
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private var service: AuthService,
+    private var userRepo: UserRepository
+):ViewModel() {
     private val username = MutableLiveData<String>();
     private val password = MutableLiveData<String>();
     private val loading = MutableLiveData<Boolean>(false);
@@ -40,29 +49,46 @@ class LoginViewModel(val storeUser:(String) -> Unit):ViewModel() {
         password.value = newValue;
     }
 
-    public fun onLogIn(onSuccess:() -> Unit,rememberUser:Boolean){
+    public fun onLogIn(onSuccess:(String?) -> Unit,rememberUser:Boolean){
         loading.value = true;
         error.value = "";
 
         GlobalScope.launch(Dispatchers.IO) {
-            val service: AuthService = AuthService();
-            val ret = service.authenticate(LogInRequest(username.value!!,password.value!!));
+            try{
+                val ret = service.authenticate(
+                    LogInRequest(username.value!!,password.value!!)
+                );
 
-            if(ret == null) {
+                if(ret == null) {
+                    withContext(Dispatchers.Main){
+                        loading.value = false;
+                        error.value = "Credenciales invalidas";
+                    }
+                }
+                else {
+                    var serializedAdmin:String? = null;
+
+                    if(rememberUser)
+                        serializedAdmin = Gson().toJson(ret);
+
+                    withContext(Dispatchers.Main){
+                        userRepo.setUserState(ret!!);
+                        loading.value = false;
+                        onSuccess(serializedAdmin);
+                    }
+                }
+            } catch(ex:IOException) {       //failed to connect to the server
                 withContext(Dispatchers.Main){
                     loading.value = false;
-                    error.value = "Credenciales invalidas";
+                    error.value = "Hubo un problema al conectarse con el servidor. " +
+                            "Por favor, comuníquese con los desarrolladores.";
                 }
-            }
-            else {
-                if(rememberUser){
-                    val serializedAdmin:String = Gson().toJson(ret);
-                    storeUser(serializedAdmin);
-                }
-
+            } catch(ex:RuntimeException){   //failed decoding the response
+                ex.printStackTrace()
                 withContext(Dispatchers.Main){
                     loading.value = false;
-                    onSuccess();
+                    error.value = "Hubo un problema con la respuesta del servidor. " +
+                            "Por favor, comuníquese con los desarrolladores.";
                 }
             }
         };

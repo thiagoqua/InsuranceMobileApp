@@ -4,9 +4,12 @@ import com.thiago.online.insurancesapp.data.models.Admin
 import com.thiago.online.insurancesapp.data.models.LogInRequest
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface AuthEndpoint {
     @POST("/api/auth")
     fun authenticate(@Body request: LogInRequest): Call<Admin>;
+    @GET("/api/auth/check")
+    fun checkTokenValidation(): Call<Unit>;
 }

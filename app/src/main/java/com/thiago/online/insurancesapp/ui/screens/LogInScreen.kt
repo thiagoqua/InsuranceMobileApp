@@ -34,15 +34,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
 import com.thiago.online.insurancesapp.viewmodel.LoginViewModel
 
 @Composable
 fun LogInScreen(
-    onStore: (String) -> Unit,
-    onSuccess: () -> Unit
+    onSuccess: (String?) -> Unit,       //when the login is successfull invokes it
+    checkingUser: Boolean               //if the app is checking in bground if the user is valid
 ){
-    val viewModel:LoginViewModel = LoginViewModel(onStore);
+    val viewModel:LoginViewModel = hiltViewModel<LoginViewModel>();
     val isLoading:Boolean = viewModel.loading_.observeAsState().value!!;
 
     InsurancesAppTheme {
@@ -56,7 +57,7 @@ fun LogInScreen(
             ){
                 Form(
                     viewModel,
-                    isLoading,
+                    isLoading || checkingUser,
                     Modifier.align(Alignment.Center),
                     onSuccess
                 );
@@ -70,8 +71,8 @@ fun LogInScreen(
 fun Form(
     viewModel: LoginViewModel,
     isLoading: Boolean,
-    modifier:Modifier,
-    onSuccess: () -> Unit
+    modifier: Modifier,
+    onSuccess: (String?) -> Unit,
 ){
     val username:String = viewModel.username_.observeAsState(initial = "").value;
     val password:String = viewModel.password_.observeAsState(initial = "").value;
