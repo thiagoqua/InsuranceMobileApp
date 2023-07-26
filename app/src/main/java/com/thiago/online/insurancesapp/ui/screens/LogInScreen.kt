@@ -35,8 +35,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.thiago.online.insurancesapp.ui.components.ErrorText
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
 import com.thiago.online.insurancesapp.viewmodel.LoginViewModel
+
+const val LogInScreenName:String = "LOG_IN_SCREEN";
 
 @Composable
 fun LogInScreen(
@@ -106,13 +109,8 @@ fun Form(
             LinearProgressIndicator();
         }
         else {
-            if(error != null){
-                Text(
-                    text = error,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.Red
-                )
-            }
+            if(error != null)
+                ErrorText(errorMessage = error);
             Button(
                 onClick = { viewModel.onLogIn(onSuccess,rememberUser.value) },
                 enabled = username.isNotEmpty() && password.isNotEmpty()

@@ -18,15 +18,15 @@ import com.google.gson.JsonParser
 import com.thiago.online.insurancesapp.data.api.services.AuthService
 import com.thiago.online.insurancesapp.data.models.Admin
 import com.thiago.online.insurancesapp.data.repositories.UserRepository
-import com.thiago.online.insurancesapp.ui.Screens
 import com.thiago.online.insurancesapp.ui.screens.InsuredsScreen
+import com.thiago.online.insurancesapp.ui.screens.InsuredsScreenName
 import com.thiago.online.insurancesapp.ui.screens.LogInScreen
+import com.thiago.online.insurancesapp.ui.screens.LogInScreenName
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -44,12 +44,12 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController();
 
             //starting page navigation
-            NavHost(navController = navController, startDestination = Screens.LOG_IN_SCREEN.name){
+            NavHost(navController = navController, startDestination = LogInScreenName){
                 //in background check if there is a user logged and if it is valid
                 checkUser(navController,checkingUser);
 
                 //log in screen statement
-                composable(Screens.LOG_IN_SCREEN.name){
+                composable(LogInScreenName){
                     LogInScreen(
                         { rememberingUser -> onLogInSuccess(rememberingUser,navController) },
                         checkingUser.value
@@ -57,10 +57,10 @@ class MainActivity : ComponentActivity() {
                 }
 
                 //main screen statement
-                composable(Screens.INSUREDS_SCREEN.name){
+                composable(InsuredsScreenName){
                     InsuredsScreen(
                         { getUser() },
-                        { navController.navigate(Screens.LOG_IN_SCREEN.name) }
+                        { endSession(navController) }
                     );
                 }
             }
@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
         if(user != null)
             storeUser(user);
 
-        navController.navigate(Screens.INSUREDS_SCREEN.name);
+        navController.navigate(InsuredsScreenName);
     }
 
     private fun checkUser(
@@ -87,8 +87,8 @@ class MainActivity : ComponentActivity() {
                     userRepository.setUserState(
                         Gson().fromJson(userLogged,Admin::class.java)
                     );
-
-                    navController.navigate(Screens.INSUREDS_SCREEN.name);
+                    checking.value = false;
+                    navController.navigate(InsuredsScreenName);
                 }
             } else {
                 withContext(Dispatchers.Main){
@@ -98,16 +98,29 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun storeUser(userAsJson:String){
+    private fun getUser():String? {
+        return getPreferences(Context.MODE_PRIVATE)
+            .getString(getString(R.string.user_logged),null);
+    }
+
+    private fun storeUser(userAsJson:String):Unit{
         with(getPreferences(MODE_PRIVATE).edit()){
             putString(getString(R.string.user_logged),userAsJson);
             apply();
         }
     }
 
-    private fun getUser():String? {
-        return getPreferences(Context.MODE_PRIVATE)
-                .getString(getString(R.string.user_logged),null);
+    private fun removeUser():Unit{
+        with(getPreferences(MODE_PRIVATE).edit()){
+            remove(getString(R.string.user_logged));
+            apply();
+        }
+    }
+
+    private fun endSession(navController: NavHostController):Unit{
+        removeUser();
+        userRepository.removeUserState();
+        navController.navigate(LogInScreenName);
     }
 
     private suspend fun isValid(userAsJson: String):Boolean{

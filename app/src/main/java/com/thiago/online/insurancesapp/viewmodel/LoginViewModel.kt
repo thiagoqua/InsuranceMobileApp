@@ -83,7 +83,7 @@ class LoginViewModel @Inject constructor(
                     error.value = "Hubo un problema al conectarse con el servidor. " +
                             "Por favor, comuníquese con los desarrolladores.";
                 }
-            } catch(ex:RuntimeException){   //failed decoding the response
+            } catch(ex:RuntimeException){   //error in the request or in the response
                 ex.printStackTrace()
                 withContext(Dispatchers.Main){
                     loading.value = false;

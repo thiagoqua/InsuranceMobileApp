@@ -6,25 +6,42 @@ import com.google.gson.JsonArray
 import com.thiago.online.insurancesapp.data.api.endpoints.InsuredEndpoint
 import com.thiago.online.insurancesapp.data.models.Insured
 import retrofit2.Response
+import java.io.IOException
 import java.lang.Exception
 import javax.inject.Inject
+import kotlin.jvm.Throws
 
 class InsuredService @Inject constructor(
     private val instance:InsuredEndpoint
 ){
-    public suspend fun getAll(token:String):List<Insured>?{
+    @Throws(IOException::class,RuntimeException::class,NotFoundException::class)
+    public suspend fun getAll(token:String):List<Insured>{
         val call:Response<JsonArray> = instance
             .getAll()
             .execute();
 
-        if(call.isSuccessful)
-            return call.body()!!
-                    .map { element ->
+        if(!call.isSuccessful())        //missing JWT or invalid
+            throw NotFoundException();
+
+        return call.body()!!.map { element ->
+                    Gson().fromJson(element,Insured::class.java)
+                };
+    }
+
+    @Throws(IOException::class,RuntimeException::class,NotFoundException::class)
+    public suspend fun search(query: String):List<Insured> {
+        val call:Response<JsonArray> = instance
+            .get(query)
+            .execute();
+
+        if(!call.isSuccessful())        //missing JWT or invalid
+            throw NotFoundException();
+
+        return if(call.body() != null && call.body()!!.count() > 0)
+                    call.body()!!.map { element ->
                         Gson().fromJson(element,Insured::class.java)
                     }
-        else if(call.raw().code() == 401)
-            throw NotFoundException();
-        else
-            throw Exception(call.raw().message());
+                else
+                    listOf();
     }
 }
