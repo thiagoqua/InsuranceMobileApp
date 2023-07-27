@@ -44,4 +44,16 @@ class InsuredService @Inject constructor(
                 else
                     listOf();
     }
+
+    @Throws(IOException::class,RuntimeException::class,NotFoundException::class)
+    public suspend fun findById(id:Long):Insured{
+        val call:Response<Insured> = instance
+            .getById(id.toString())
+            .execute();
+
+        if(!call.isSuccessful())       //missing JWT or invalid
+            throw NotFoundException()
+
+        return call.body()!!;
+    }
 }

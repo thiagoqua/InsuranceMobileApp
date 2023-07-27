@@ -9,15 +9,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.thiago.online.insurancesapp.data.api.services.AuthService
 import com.thiago.online.insurancesapp.data.models.Admin
 import com.thiago.online.insurancesapp.data.repositories.UserRepository
+import com.thiago.online.insurancesapp.ui.screens.DetailsScreen
+import com.thiago.online.insurancesapp.ui.screens.DetailsScreenName
 import com.thiago.online.insurancesapp.ui.screens.InsuredsScreen
 import com.thiago.online.insurancesapp.ui.screens.InsuredsScreenName
 import com.thiago.online.insurancesapp.ui.screens.LogInScreen
@@ -55,13 +59,23 @@ class MainActivity : ComponentActivity() {
                         checkingUser.value
                     );
                 }
-
                 //main screen statement
                 composable(InsuredsScreenName){
                     InsuredsScreen(
                         { getUser() },
-                        { endSession(navController) }
+                        { endSession(navController) },
+                        { id -> navController.navigate("${DetailsScreenName}/${id}") }
                     );
+                }
+                //details screen statement
+                composable(
+                    route = "${DetailsScreenName}/{insuredId}",
+                    arguments = listOf(
+                        navArgument("insuredId"){ type = NavType.LongType }
+                    )
+                ){ navEntry ->
+                    val id:Long = navEntry.arguments?.getLong("insuredId")!!;
+                    DetailsScreen(id);
                 }
             }
         }

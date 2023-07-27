@@ -6,8 +6,8 @@ import java.time.format.DateTimeFormatter
 
 data class Producer(
     val id:Long,
-    val Firstname:String,
-    val Lastname:String,
-    val Joined:String,
-    val Code:Int
+    val firstname:String,
+    val lastname:String,
+    val joined:String,
+    val code:Int
 );

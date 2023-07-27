@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.thiago.online.insurancesapp.R
 import com.thiago.online.insurancesapp.data.api.services.AuthService
+import com.thiago.online.insurancesapp.data.helpers.NetworkExceptionResolver
 import com.thiago.online.insurancesapp.data.models.Admin
 import com.thiago.online.insurancesapp.data.models.LogInRequest
 import com.thiago.online.insurancesapp.data.repositories.UserRepository
@@ -27,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private var service: AuthService,
-    private var userRepo: UserRepository
+    private var userRepo: UserRepository,
+    private var exceptionResolver: NetworkExceptionResolver
 ):ViewModel() {
     private val username = MutableLiveData<String>();
     private val password = MutableLiveData<String>();
@@ -54,41 +56,33 @@ class LoginViewModel @Inject constructor(
         error.value = "";
 
         GlobalScope.launch(Dispatchers.IO) {
-            try{
-                val ret = service.authenticate(
-                    LogInRequest(username.value!!,password.value!!)
-                );
-
-                if(ret == null) {
+            val request:LogInRequest = LogInRequest(username.value!!,password.value!!);
+            val result = exceptionResolver.resolveLogIn(
+                fn = { service.authenticate(request) },
+                onError = { errorMessage ->
                     withContext(Dispatchers.Main){
                         loading.value = false;
-                        error.value = "Credenciales invalidas";
+                        error.value = errorMessage;
                     }
                 }
-                else {
-                    var serializedAdmin:String? = null;
+            );
 
-                    if(rememberUser)
-                        serializedAdmin = Gson().toJson(ret);
-
-                    withContext(Dispatchers.Main){
-                        userRepo.setUserState(ret!!);
-                        loading.value = false;
-                        onSuccess(serializedAdmin);
-                    }
-                }
-            } catch(ex:IOException) {       //failed to connect to the server
+            if(result == null){
                 withContext(Dispatchers.Main){
                     loading.value = false;
-                    error.value = "Hubo un problema al conectarse con el servidor. " +
-                            "Por favor, comuníquese con los desarrolladores.";
+                    error.value = "Credenciales invalidas";
                 }
-            } catch(ex:RuntimeException){   //error in the request or in the response
-                ex.printStackTrace()
+            }
+            else {
+                var serializedAdmin:String? = null;
+
+                if(rememberUser)
+                    serializedAdmin = Gson().toJson(result);
+
                 withContext(Dispatchers.Main){
+                    userRepo.setUserState(result!!);
                     loading.value = false;
-                    error.value = "Hubo un problema con la respuesta del servidor. " +
-                            "Por favor, comuníquese con los desarrolladores.";
+                    onSuccess(serializedAdmin);
                 }
             }
         };

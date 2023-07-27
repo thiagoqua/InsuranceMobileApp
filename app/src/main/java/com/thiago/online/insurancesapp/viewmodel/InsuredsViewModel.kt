@@ -63,6 +63,8 @@ class InsuredsViewModel @Inject constructor(
             if(result != null) {
                 withContext(Dispatchers.Main) {
                     insureds.value = result!!;
+                    if(!error.value.isNullOrEmpty())
+                        error.value = null;
                 }
             }
         }

@@ -4,5 +4,5 @@ data class Phone(
   val id:Long,
   val insured:Long,
   val number:String,
-  val description:String
+  val description:String?
 );
