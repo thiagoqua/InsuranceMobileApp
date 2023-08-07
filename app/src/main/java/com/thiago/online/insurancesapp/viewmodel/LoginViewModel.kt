@@ -51,7 +51,10 @@ class LoginViewModel @Inject constructor(
         password.value = newValue;
     }
 
-    public fun onLogIn(onSuccess:(String?) -> Unit,rememberUser:Boolean){
+    public fun onLogIn(
+        onSuccess:(String?) -> Unit,
+        rememberUser:Boolean
+    ){
         loading.value = true;
         error.value = "";
 
@@ -68,9 +71,11 @@ class LoginViewModel @Inject constructor(
             );
 
             if(result == null){
-                withContext(Dispatchers.Main){
-                    loading.value = false;
-                    error.value = "Credenciales invalidas";
+                if(error.value.isNullOrEmpty()) { //means that there isn't an exception thrown
+                    withContext(Dispatchers.Main) {
+                        loading.value = false;
+                        error.value = "Credenciales invalidas";
+                    }
                 }
             }
             else {

@@ -1,5 +1,7 @@
 package com.thiago.online.insurancesapp.ui.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,15 +29,18 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.thiago.online.insurancesapp.ui.components.ErrorText
+import com.thiago.online.insurancesapp.R
+import com.thiago.online.insurancesapp.ui.ErrorText
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
 import com.thiago.online.insurancesapp.viewmodel.LoginViewModel
 
@@ -56,7 +61,8 @@ fun LogInScreen(
         ) {
             Box(modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(16.dp),
+                Center
             ){
                 Form(
                     viewModel,
@@ -84,8 +90,14 @@ fun Form(
     val rememberUser = remember { mutableStateOf<Boolean>(false) };
 
     Column(
-        modifier = Modifier
+        modifier = Modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Image(
+            painter = painterResource(R.drawable.logo),
+            contentDescription = "company_logo"
+        )
         UsernameField(
             username,
             { newValue -> viewModel.usernameChanged(newValue) },
@@ -123,7 +135,10 @@ fun Form(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UsernameField(username: String, onValueChange: (String) -> Unit, enabled: Boolean){
+fun UsernameField(
+    username: String,
+    onValueChange: (String) -> Unit, enabled: Boolean
+){
     TextField(
         value = username,
         onValueChange = { text -> onValueChange(text) },
@@ -140,7 +155,10 @@ fun UsernameField(username: String, onValueChange: (String) -> Unit, enabled: Bo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordField(password: String, onValueChange: (String) -> Unit, enabled: Boolean){
+fun PasswordField(
+    password: String,
+    onValueChange: (String) -> Unit, enabled: Boolean
+){
     val show: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     TextField(
@@ -173,7 +191,9 @@ fun RememberUserField(
     onValueChange: (Boolean) -> Unit,
     enabled: Boolean
 ){
-    Row() {
+    Row(
+        verticalAlignment = CenterVertically
+    ) {
         Text(
             text = "Recordarme",
             modifier = Modifier.align(CenterVertically)

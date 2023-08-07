@@ -1,5 +1,6 @@
 package com.thiago.online.insurancesapp.data.api
 
+import com.thiago.online.insurancesapp.R
 import com.thiago.online.insurancesapp.data.api.endpoints.AuthEndpoint
 import com.thiago.online.insurancesapp.data.api.endpoints.CompanyEndpoint
 import com.thiago.online.insurancesapp.data.api.endpoints.InsuredEndpoint
@@ -16,11 +17,14 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+    const val backend_url:String = "http://insuranceapi.somee.com:80/";
+    const val backend_local_url:String = "http://192.168.0.211:5000/";
+
     @Singleton
     @Provides
     fun provideRetrofit(userRepo:UserRepository):Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://192.168.0.211:5000/")
+            .baseUrl(backend_url)
             .client(
                 OkHttpClient().newBuilder()
                     .addInterceptor(TokenInterceptor(userRepo))

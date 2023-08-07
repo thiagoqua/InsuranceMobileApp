@@ -1,20 +1,37 @@
 package com.thiago.online.insurancesapp.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,15 +39,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.thiago.online.insurancesapp.data.models.Address
 import com.thiago.online.insurancesapp.data.models.Insured
 import com.thiago.online.insurancesapp.data.models.Phone
-import com.thiago.online.insurancesapp.ui.components.CircleLoader
-import com.thiago.online.insurancesapp.ui.components.ErrorText
+import com.thiago.online.insurancesapp.ui.CircleLoader
+import com.thiago.online.insurancesapp.ui.ErrorText
+import com.thiago.online.insurancesapp.ui.Popup
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
 import com.thiago.online.insurancesapp.viewmodel.DetailsViewModel
 
-const val DetailsScreenName:String = "DETAILS_SCREEN";
+public const val DetailsScreenName:String = "DETAILS_SCREEN";
+private val appBarTitle:MutableState<String> = mutableStateOf("");
+private val showPopup:MutableState<Boolean> = mutableStateOf(false);
 
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun DetailsScreen(
+public fun DetailsScreen(
     insuredId:Long
 ) {
     val viewModel:DetailsViewModel = hiltViewModel<DetailsViewModel>();
@@ -38,29 +60,118 @@ fun DetailsScreen(
     val error:String? = viewModel.error_.observeAsState().value;
 
     viewModel.initiliaizeWith(insuredId);
+    if (insured != null) {
+        appBarTitle.value = "${insured.firstname} ${insured.lastname}"
+    }
+
+    BackHandler(enabled = false) {}
 
     InsurancesAppTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            if(error != null)
-                ErrorText(errorMessage = error);
+            Scaffold(
+                topBar = { DetailsAppBar(insured) }
+            ) {
+                if(error != null)
+                    ErrorText(errorMessage = error);
 
-            if(insured != null)
-                InsuredDetails(insured);
-            else
-                CircleLoader();
+                if(showPopup.value)
+                    onCallPressed(insured?.phones!!)
+
+                if(insured != null)
+                    InsuredDetails(insured);
+                else
+                    CircleLoader();
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InsuredDetails(insured:Insured) {
+private fun DetailsAppBar(insured:Insured?) {
+    TopAppBar(
+        title = { Text(
+            text = appBarTitle.value,
+            color = Color.White
+        ) },
+        actions = {
+            IconButton(
+                onClick = { showPopup.value = true },
+                enabled = insured?.phones != null
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Call,
+                    tint = Color.White,
+                    contentDescription = "End Session"
+                )
+            }
+        },
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.tertiary
+        )
+    );
+}
+
+@Composable
+private fun onCallPressed(phones: Array<Phone>) {
+    val context:Context = LocalContext.current;
+
+    if(phones.size > 1){
+        val phonePrefix:String = "tel:";
+        var phoneToCall:MutableState<String> = remember { mutableStateOf(phonePrefix) };
+        val phoneSelectedId:MutableState<Long?> = remember { mutableStateOf(null) };
+
+        Popup(
+            enabled = showPopup,
+            title = "Seleccione teléfono a llamar",
+            mainText = {
+                Column() {
+                    phones.forEach { phone ->
+                        TextButton(
+                            onClick = {
+                                phoneToCall.value = "${phonePrefix}${phone.number}";
+                                phoneSelectedId.value = phone.id;
+                            }
+                        ) {
+                            var text: String = "${phone.number}";
+                            val color:Color =
+                                if( phoneSelectedId.value != null &&
+                                    phoneSelectedId.value == phone.id)
+                                    MaterialTheme.colorScheme.primary;
+                                else
+                                    Color.Black;
+
+                            if (phone.description != null)
+                                text += " - ${phone.description}";
+
+                            Text(text = text,color = color);
+                        }
+                    }
+                };
+            },
+            onConfirm = {
+                var uri:Uri = Uri.parse(phoneToCall.value);
+                var dialIntent:Intent = Intent(Intent.ACTION_DIAL, uri);
+                context.startActivity(dialIntent);
+                showPopup.value = false;
+            }
+        );
+    }
+    else {
+        val uri:Uri = Uri.parse("tel:${phones[0].number}");
+        val dialIntent:Intent = Intent(Intent.ACTION_DIAL,uri);
+        context.startActivity(dialIntent);
+    }
+}
+
+@Composable
+private fun InsuredDetails(insured:Insured) {
     val producerFullName:String =
         "${insured.producerNavigation.firstname} ${insured.producerNavigation.lastname}";
     val address:Address = insured.addressNavigation;
-    val phoneText:String = if(insured.phones.count() > 1) "Teléfonos" else "Teléfono";
     val bornDate:String = insured.born.split('T')[0];
 
     LazyColumn(
@@ -106,9 +217,6 @@ fun InsuredDetails(insured:Insured) {
                     Modifier.weight(1f)
                 );
             }
-            DataTitle(phoneText);
-            InsuredDetailPhones(insured.phones);
-
             DataTitle("Dirección");
             Row(){
                 InsuredDetailData(
@@ -214,18 +322,20 @@ fun InsuredDetails(insured:Insured) {
 }
 
 @Composable
-fun InsuredDetailData(
+private fun InsuredDetailData(
     label:String,
     value:String?,
     modifier: Modifier
 ) {
-    if(!value.isNullOrEmpty()) {
-        Row(
-            modifier = modifier
-        ) {
+    Row(
+        modifier = modifier
+    ) {
+        if(!value.isNullOrEmpty()) {
             Text(
                 text = label,
-                modifier = modifier
+                fontWeight = FontWeight.Bold,
+                modifier = modifier,
+                color = MaterialTheme.colorScheme.tertiary
             );
             Text(
                 text = value,
@@ -233,66 +343,24 @@ fun InsuredDetailData(
                 modifier = modifier
             );
         }
-    }
-    else
-        Spacer(modifier = modifier);
-}
-
-@Composable
-fun InsuredDetailPhones(phones:Array<Phone>) {
-    val totalPhones:Int = phones.count();
-
-    Column(){
-        Column() {
-            InsuredDetailData(
-                "Número de teléfono",
-                phones[0].number,
-                Modifier.weight(1f)
+        else {
+            Text(
+                text = label,
+                modifier = modifier,
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray
             );
-            InsuredDetailData(
-                "Descripción",
-                phones[0].description,
-                Modifier.weight(1f)
-            );
-        }
-        if(totalPhones > 1){
-            Column() {
-                InsuredDetailData(
-                    "Número de teléfono",
-                    phones[1].number,
-                    Modifier.weight(1f)
-                );
-                InsuredDetailData(
-                    "Descripción",
-                    phones[1].description,
-                    Modifier.weight(1f)
-                );
-            }
-        }
-        if(totalPhones > 2){
-            Column() {
-                InsuredDetailData(
-                    "Número de teléfono",
-                    phones[2].number,
-                    Modifier.weight(1f)
-                );
-                InsuredDetailData(
-                    "Descripción",
-                    phones[2].description,
-                    Modifier.weight(1f)
-                );
-            }
         }
     }
 }
 
 @Composable
-fun DataTitle(text:String) {
+private fun DataTitle(text:String) {
     Text(
         text = text,
         modifier = Modifier.padding(20.dp),
         fontSize = 30.sp,
         fontWeight = FontWeight.ExtraBold,
-        color = Color.Blue
-    )
+        color = MaterialTheme.colorScheme.tertiary
+    );
 }

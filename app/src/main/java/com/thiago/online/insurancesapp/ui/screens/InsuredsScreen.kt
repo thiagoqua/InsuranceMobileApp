@@ -1,5 +1,6 @@
 package com.thiago.online.insurancesapp.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,12 +35,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.thiago.online.insurancesapp.data.models.Insured
-import com.thiago.online.insurancesapp.ui.components.CircleLoader
-import com.thiago.online.insurancesapp.ui.components.ErrorText
+import com.thiago.online.insurancesapp.ui.CircleLoader
+import com.thiago.online.insurancesapp.ui.ErrorText
+import com.thiago.online.insurancesapp.ui.Popup
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
 import com.thiago.online.insurancesapp.viewmodel.InsuredsViewModel
 
@@ -54,6 +57,9 @@ public fun InsuredsScreen(
     onDetails:(Long) -> Unit
 ) {
     val viewModel:InsuredsViewModel = hiltViewModel<InsuredsViewModel>();
+    val popupEnabled:MutableState<Boolean> = remember { mutableStateOf(false) }
+
+    BackHandler(enabled = true) {}
 
     InsurancesAppTheme {
         Surface(
@@ -61,16 +67,25 @@ public fun InsuredsScreen(
             color = MaterialTheme.colorScheme.background
         ) {
             Scaffold(
-                topBar = { AppBar(
-                    viewModel.userLogged.username,
-                    { onEndSession() }
-                )}
+                topBar = {
+                    AppBar(
+                        viewModel.userLogged.username,
+                        { popupEnabled.value = true }
+                    );
+                }
             ) { padding ->
                 val insureds:List<Insured>? = viewModel.insureds_.observeAsState().value;
                 val error:String? = viewModel.error_.observeAsState().value;
 
                 if(insureds != null) {
                     Column() {
+                        Popup(
+                            enabled = popupEnabled,
+                            title = "Cerrar sesión",
+                            mainText = { Text("Está seguro que desea cerrar sesión?") },
+                            onConfirm = onEndSession,
+                            onDismiss = { popupEnabled.value = false }
+                        );
                         InsuredsSearcher(
                             { query -> viewModel.search(query) },
                             { viewModel.showAll() },
@@ -99,18 +114,24 @@ private fun AppBar(
     onCloseSession: () -> Unit
 ){
     TopAppBar(
-        title = { Text(text = username) },
+        title = { Text(
+            text = username,
+            color = Color.White
+        ) },
         actions = {
             IconButton(
-                onClick = { onCloseSession() },
+                onClick = onCloseSession,
             ) {
                 Icon(
                     imageVector = Icons.Filled.Person,
+                    tint = Color.White,
                     contentDescription = "End Session"
                 )
             }
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.LightGray)
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        )
     );
 }
 
@@ -207,7 +228,7 @@ private fun InsuredItem(
 }
 
 @Composable
-fun InsuredInfo(
+private fun InsuredInfo(
     insured: Insured,
     modifier: Modifier
 ) {
@@ -220,14 +241,22 @@ fun InsuredInfo(
 
         Text(
             text = "${insured.firstname} ${insured.lastname}",
-            modifier = Modifier
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
         );
-        Text(
-            text = "Productor: ${producerName}"
-        );
+        Row(){
+            Text(
+                text = "Productor: "
+            );
+            Text(
+                text = producerName,
+                color = MaterialTheme.colorScheme.primary
+            );
+        }
         if(!policyOf.isNullOrEmpty())
             Text(
-                text = policyOf
+                text = policyOf,
+                color = MaterialTheme.colorScheme.primary
             );
     }
 }
