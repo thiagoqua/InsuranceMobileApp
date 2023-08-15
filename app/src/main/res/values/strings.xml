@@ -3,4 +3,5 @@
 <!--    shared prefs key values    -->
     <string name="user_logged">very_private_and_complicated_user_logged_key</string>
     <string name="user_logged_creation">user_logged_created_at</string>
+    <string name="shared_prefs">com.thiago.online.insurancesapp.MY_PREFS</string>
 </resources>

@@ -4,6 +4,7 @@ import com.thiago.online.insurancesapp.R
 import com.thiago.online.insurancesapp.data.api.endpoints.AuthEndpoint
 import com.thiago.online.insurancesapp.data.api.endpoints.CompanyEndpoint
 import com.thiago.online.insurancesapp.data.api.endpoints.InsuredEndpoint
+import com.thiago.online.insurancesapp.data.api.endpoints.ProducerEndpoint
 import com.thiago.online.insurancesapp.data.repositories.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -50,5 +51,11 @@ object NetworkModule {
     @Provides
     public fun provideInsuredInstance(retrofit: Retrofit): InsuredEndpoint {
         return retrofit.create(InsuredEndpoint::class.java);
+    }
+
+    @Singleton
+    @Provides
+    public fun provideProducerInstance(retrofit: Retrofit): ProducerEndpoint {
+        return retrofit.create(ProducerEndpoint::class.java);
     }
 }

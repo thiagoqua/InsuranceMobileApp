@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -40,7 +41,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.thiago.online.insurancesapp.R
-import com.thiago.online.insurancesapp.ui.ErrorText
+import com.thiago.online.insurancesapp.ui.components.ErrorText
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
 import com.thiago.online.insurancesapp.viewmodel.LoginViewModel
 
@@ -96,7 +97,8 @@ fun Form(
     ) {
         Image(
             painter = painterResource(R.drawable.logo),
-            contentDescription = "company_logo"
+            contentDescription = "company_logo",
+            modifier = Modifier.fillMaxWidth(0.7f)
         )
         UsernameField(
             username,
@@ -125,7 +127,8 @@ fun Form(
                 ErrorText(errorMessage = error);
             Button(
                 onClick = { viewModel.onLogIn(onSuccess,rememberUser.value) },
-                enabled = username.isNotEmpty() && password.isNotEmpty()
+                enabled = username.isNotEmpty() && password.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth(0.5f)
             ) {
                 Text(text = "Iniciar Sesión")
             }

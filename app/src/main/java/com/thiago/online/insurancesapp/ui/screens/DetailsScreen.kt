@@ -24,6 +24,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -39,15 +40,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.thiago.online.insurancesapp.data.models.Address
 import com.thiago.online.insurancesapp.data.models.Insured
 import com.thiago.online.insurancesapp.data.models.Phone
-import com.thiago.online.insurancesapp.ui.CircleLoader
-import com.thiago.online.insurancesapp.ui.ErrorText
-import com.thiago.online.insurancesapp.ui.Popup
+import com.thiago.online.insurancesapp.ui.components.CircleLoader
+import com.thiago.online.insurancesapp.ui.components.ErrorText
+import com.thiago.online.insurancesapp.ui.components.Popup
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
 import com.thiago.online.insurancesapp.viewmodel.DetailsViewModel
 
 public const val DetailsScreenName:String = "DETAILS_SCREEN";
 private val appBarTitle:MutableState<String> = mutableStateOf("");
-private val showPopup:MutableState<Boolean> = mutableStateOf(false);
+private val makeDial:MutableState<Boolean> = mutableStateOf(false);
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -56,10 +57,12 @@ public fun DetailsScreen(
     insuredId:Long
 ) {
     val viewModel:DetailsViewModel = hiltViewModel<DetailsViewModel>();
+    LaunchedEffect(key1 = insuredId){
+        viewModel.initiliaizeWith(insuredId);
+    }
     val insured:Insured? = viewModel.insured_.observeAsState().value;
     val error:String? = viewModel.error_.observeAsState().value;
 
-    viewModel.initiliaizeWith(insuredId);
     if (insured != null) {
         appBarTitle.value = "${insured.firstname} ${insured.lastname}"
     }
@@ -77,7 +80,9 @@ public fun DetailsScreen(
                 if(error != null)
                     ErrorText(errorMessage = error);
 
-                if(showPopup.value)
+                //is never null becouse when its null, the button is deactivated
+                //is here becouse the popup needs to render over the screen
+                if(makeDial.value)
                     onCallPressed(insured?.phones!!)
 
                 if(insured != null)
@@ -99,7 +104,7 @@ private fun DetailsAppBar(insured:Insured?) {
         ) },
         actions = {
             IconButton(
-                onClick = { showPopup.value = true },
+                onClick = { makeDial.value = true },
                 enabled = insured?.phones != null
             ) {
                 Icon(
@@ -125,7 +130,7 @@ private fun onCallPressed(phones: Array<Phone>) {
         val phoneSelectedId:MutableState<Long?> = remember { mutableStateOf(null) };
 
         Popup(
-            enabled = showPopup,
+            enabled = makeDial,
             title = "Seleccione teléfono a llamar",
             mainText = {
                 Column() {
@@ -156,7 +161,7 @@ private fun onCallPressed(phones: Array<Phone>) {
                 var uri:Uri = Uri.parse(phoneToCall.value);
                 var dialIntent:Intent = Intent(Intent.ACTION_DIAL, uri);
                 context.startActivity(dialIntent);
-                showPopup.value = false;
+                makeDial.value = false;
             }
         );
     }
@@ -164,6 +169,7 @@ private fun onCallPressed(phones: Array<Phone>) {
         val uri:Uri = Uri.parse("tel:${phones[0].number}");
         val dialIntent:Intent = Intent(Intent.ACTION_DIAL,uri);
         context.startActivity(dialIntent);
+        makeDial.value = false;
     }
 }
 

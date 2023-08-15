@@ -2,7 +2,9 @@ package com.thiago.online.insurancesapp.data.helpers
 
 import android.content.res.Resources
 import com.thiago.online.insurancesapp.data.models.Admin
+import com.thiago.online.insurancesapp.data.models.Company
 import com.thiago.online.insurancesapp.data.models.Insured
+import com.thiago.online.insurancesapp.data.models.Producer
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -72,6 +74,36 @@ class NetworkExceptionResolver @Inject constructor(){
 
         if(ret != null && ret is Insured)
             return ret;
+
+        return null;
+    }
+
+    public suspend fun resolveCompanies(
+        fn: suspend () -> List<Company>?,
+        onError: suspend (String) -> Unit
+    ):List<Company>?{
+        val ret = resolve(
+            fn,
+            onError
+        );
+
+        if(ret != null && ret is List<*>)
+            return ret as List<Company>;
+
+        return null;
+    }
+
+    public suspend fun resolveProducers(
+        fn: suspend () -> List<Producer>?,
+        onError: suspend (String) -> Unit
+    ):List<Producer>?{
+        val ret = resolve(
+            fn,
+            onError
+        );
+
+        if(ret != null && ret is List<*>)
+            return ret as List<Producer>;
 
         return null;
     }

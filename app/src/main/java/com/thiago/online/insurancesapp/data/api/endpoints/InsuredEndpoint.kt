@@ -14,4 +14,11 @@ interface InsuredEndpoint {
     fun get(@Query("query") query:String): Call<JsonArray>;
     @GET("/api/insured/{id}")
     fun getById(@Path("id") id:String): Call<Insured>;
+    @GET("/api/insured/filter")
+    fun getByFilters(
+        @Query("company") company:String? = null,
+        @Query("producer") producer:String? = null,
+        @Query("lifestart") lifestart:String? = null,
+        @Query("status") status:String? = null,
+    ):Call<JsonArray>;
 }

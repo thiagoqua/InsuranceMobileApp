@@ -1,6 +1,5 @@
 package com.thiago.online.insurancesapp
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +17,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.thiago.online.insurancesapp.data.api.services.AuthService
+import com.thiago.online.insurancesapp.data.helpers.SharedPreferencesHandler
 import com.thiago.online.insurancesapp.data.models.Admin
 import com.thiago.online.insurancesapp.data.repositories.UserRepository
 import com.thiago.online.insurancesapp.ui.screens.DetailsScreen
@@ -39,6 +39,8 @@ class MainActivity : ComponentActivity() {
     public lateinit var userRepository:UserRepository;
     @Inject
     public lateinit var authService: AuthService;
+    @Inject
+    public lateinit var sharedPrefHandler:SharedPreferencesHandler;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
@@ -46,6 +48,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val checkingUser:MutableState<Boolean> = remember{ mutableStateOf(true) }
             val navController = rememberNavController();
+
+            sharedPrefHandler.initializeWidth(this);
 
             //starting page navigation
             NavHost(navController = navController, startDestination = LogInScreenName){
@@ -62,7 +66,6 @@ class MainActivity : ComponentActivity() {
                 //main screen statement
                 composable(InsuredsScreenName){
                     InsuredsScreen(
-                        { getUser() },
                         { endSession(navController) },
                         { id -> navController.navigate("${DetailsScreenName}/${id}") }
                     );
@@ -81,10 +84,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun onLogInSuccess(user:String? = null,navController: NavController):Unit{
+    private fun onLogInSuccess(
+        user: String? = null,
+        navController: NavController
+    ):Unit{
         /* null if the user doesn't click remember me*/
         if(user != null)
-            storeUser(user);
+            sharedPrefHandler.storeUser(user);
 
         navController.navigate(InsuredsScreenName);
     }
@@ -94,7 +100,7 @@ class MainActivity : ComponentActivity() {
         checking: MutableState<Boolean>
     ){
         GlobalScope.launch(Dispatchers.IO) {
-            var userLogged:String? = getUser();
+            var userLogged:String? = sharedPrefHandler.getUser();
 
             if(userLogged != null && isValid(userLogged)){
                 withContext(Dispatchers.Main){
@@ -112,27 +118,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun getUser():String? {
-        return getPreferences(Context.MODE_PRIVATE)
-            .getString(getString(R.string.user_logged),null);
-    }
-
-    private fun storeUser(userAsJson:String):Unit{
-        with(getPreferences(MODE_PRIVATE).edit()){
-            putString(getString(R.string.user_logged),userAsJson);
-            apply();
-        }
-    }
-
-    private fun removeUser():Unit{
-        with(getPreferences(MODE_PRIVATE).edit()){
-            remove(getString(R.string.user_logged));
-            apply();
-        }
-    }
-
     private fun endSession(navController: NavHostController):Unit{
-        removeUser();
+        sharedPrefHandler.removeUser();
         userRepository.removeUserState();
         navController.navigate(LogInScreenName);
     }

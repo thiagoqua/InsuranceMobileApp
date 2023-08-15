@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DisabledByDefault
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,9 +43,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.thiago.online.insurancesapp.data.models.Insured
-import com.thiago.online.insurancesapp.ui.CircleLoader
-import com.thiago.online.insurancesapp.ui.ErrorText
-import com.thiago.online.insurancesapp.ui.Popup
+import com.thiago.online.insurancesapp.ui.components.CircleLoader
+import com.thiago.online.insurancesapp.ui.components.ErrorText
+import com.thiago.online.insurancesapp.ui.components.FilterPopup
+import com.thiago.online.insurancesapp.ui.components.Popup
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
 import com.thiago.online.insurancesapp.viewmodel.InsuredsViewModel
 
@@ -52,12 +55,12 @@ const val InsuredsScreenName:String = "MAIN_SCREEN";
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun InsuredsScreen(
-    getUserLogged:() -> String?,
     onEndSession:() -> Unit,
     onDetails:(Long) -> Unit
 ) {
     val viewModel:InsuredsViewModel = hiltViewModel<InsuredsViewModel>();
     val popupEnabled:MutableState<Boolean> = remember { mutableStateOf(false) }
+    val filterPopupEnabled:MutableState<Boolean> = remember { mutableStateOf(false) }
 
     BackHandler(enabled = true) {}
 
@@ -69,16 +72,20 @@ public fun InsuredsScreen(
             Scaffold(
                 topBar = {
                     AppBar(
-                        viewModel.userLogged.username,
-                        { popupEnabled.value = true }
+                        username = viewModel.userLogged.username,
+                        onCloseSession = { popupEnabled.value = true },
+                        onFilters = { filterPopupEnabled.value = true },
+                        filtersApplied = viewModel.areFiltersApplied_.observeAsState().value!!,
+                        onCancelFilters = { viewModel.showAll() }
                     );
                 }
             ) { padding ->
                 val insureds:List<Insured>? = viewModel.insureds_.observeAsState().value;
                 val error:String? = viewModel.error_.observeAsState().value;
+                val filtersApplied:Boolean = viewModel.areFiltersApplied_.observeAsState().value!!;
 
                 if(insureds != null) {
-                    Column() {
+                    Column {
                         Popup(
                             enabled = popupEnabled,
                             title = "Cerrar sesión",
@@ -86,15 +93,25 @@ public fun InsuredsScreen(
                             onConfirm = onEndSession,
                             onDismiss = { popupEnabled.value = false }
                         );
+                        FilterPopup(
+                            enabled = filterPopupEnabled,
+                            insureds = viewModel.insureds_!!.value!!,
+                            producers = viewModel.producers()!!.value!!,
+                            companies = viewModel.companies()!!.value!!,
+                            onApply = { filters -> viewModel.resolveFilters(filters) }
+                        );
                         InsuredsSearcher(
-                            { query -> viewModel.search(query) },
-                            { viewModel.showAll() },
+                            search = { query -> viewModel.search(query) },
+                            showAll = { viewModel.showAll() },
+                            filtersApplied = filtersApplied,
                             modifier = Modifier.padding(padding)
                         );
+
                         if(error != null)
                             ErrorText(errorMessage = error);
-                        InsuredsTable(
-                            viewModel.insureds_.value!!,
+
+                        InsuredsList(
+                            insureds,
                             modifier = Modifier.padding(padding),
                             onDetails
                         );
@@ -111,21 +128,46 @@ public fun InsuredsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun AppBar(
     username: String,
-    onCloseSession: () -> Unit
+    onCloseSession: () -> Unit,
+    onFilters: () -> Unit,
+    filtersApplied: Boolean,
+    onCancelFilters: () -> Unit
 ){
     TopAppBar(
-        title = { Text(
-            text = username,
-            color = Color.White
-        ) },
+        title = { 
+            Text(
+                text = username,
+                color = Color.White
+            ); 
+        },
         actions = {
+            if(!filtersApplied)
+                IconButton(
+                    onClick = onFilters,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Tune,
+                        tint = Color.White,
+                        contentDescription = "get_filters"
+                    )
+                }
+            else
+                IconButton(
+                    onClick = onCancelFilters,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.DisabledByDefault,
+                        tint = Color(0xFFA87777),
+                        contentDescription = "close_filters"
+                    )
+                }
             IconButton(
                 onClick = onCloseSession,
             ) {
                 Icon(
                     imageVector = Icons.Filled.Person,
                     tint = Color.White,
-                    contentDescription = "End Session"
+                    contentDescription = "end_session"
                 )
             }
         },
@@ -140,11 +182,12 @@ private fun AppBar(
 private fun InsuredsSearcher(
     search:(String) -> Unit,
     showAll:() -> Unit,
+    filtersApplied:Boolean,
     modifier:Modifier = Modifier
 ) {
     val text:MutableState<String> = remember { mutableStateOf<String>("") }
 
-    if(text.value.isEmpty())
+    if(text.value.isEmpty() && !filtersApplied)
         showAll();
 
     Row(
@@ -173,7 +216,7 @@ private fun InsuredsSearcher(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun InsuredsTable(
+private fun InsuredsList(
     insureds: List<Insured>,
     modifier: Modifier = Modifier,
     onDetails: (Long) -> Unit
