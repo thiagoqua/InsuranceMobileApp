@@ -157,7 +157,7 @@ private fun AppBar(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.DisabledByDefault,
-                        tint = Color(0xFFA87777),
+                        tint = MaterialTheme.colorScheme.error,
                         contentDescription = "close_filters"
                     )
                 }

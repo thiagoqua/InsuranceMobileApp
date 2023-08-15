@@ -110,7 +110,7 @@ private fun DetailsAppBar(insured:Insured?) {
                 Icon(
                     imageVector = Icons.Filled.Call,
                     tint = Color.White,
-                    contentDescription = "End Session"
+                    contentDescription = "call"
                 )
             }
         },

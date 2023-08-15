@@ -1,8 +1,11 @@
 package com.thiago.online.insurancesapp.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
@@ -14,8 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import com.thiago.online.insurancesapp.data.models.Company
 import com.thiago.online.insurancesapp.data.models.Insured
@@ -76,8 +81,12 @@ fun FilterPopup(
                     enabled.value = false;
                     onApply(filters);
                 }) {
-                    Row() {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text("Aplicar");
+                        Spacer(Modifier.size(5.dp));
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = "apply_filters"
@@ -86,9 +95,19 @@ fun FilterPopup(
                 }
             },
             dismissButton = {
-                Button(onClick = { enabled.value = false; }) {
-                    Row() {
+                Button(
+                    onClick = { enabled.value = false; },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text("Descartar");
+                        Spacer(Modifier.size(5.dp));
                         Icon(
                             imageVector = Icons.Filled.Cancel,
                             contentDescription = "cancel_filters"
