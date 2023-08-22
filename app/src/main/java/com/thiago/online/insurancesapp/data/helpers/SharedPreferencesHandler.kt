@@ -11,7 +11,7 @@ class SharedPreferencesHandler @Inject constructor() {
     private var sharedPrefs:SharedPreferences? = null;
     private var userLoggedKey:String? = null;
 
-    public fun initializeWidth(activityContext:Context):Unit {
+    public fun initializeWith(activityContext:Context):Unit {
         userLoggedKey = activityContext.getString(R.string.user_logged);
         sharedPrefs = activityContext.getSharedPreferences(
             activityContext.getString(R.string.shared_prefs),

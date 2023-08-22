@@ -15,10 +15,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DisabledByDefault
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +50,8 @@ import com.thiago.online.insurancesapp.ui.components.ErrorText
 import com.thiago.online.insurancesapp.ui.components.FilterPopup
 import com.thiago.online.insurancesapp.ui.components.Popup
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
+import com.thiago.online.insurancesapp.ui.theme.retrowFont
+import com.thiago.online.insurancesapp.ui.theme.theBoldFont
 import com.thiago.online.insurancesapp.viewmodel.InsuredsViewModel
 
 const val InsuredsScreenName:String = "MAIN_SCREEN";
@@ -137,7 +141,9 @@ private fun AppBar(
         title = { 
             Text(
                 text = username,
-                color = Color.White
+                color = Color.White,
+                fontFamily = retrowFont,
+                fontSize = 35.sp
             ); 
         },
         actions = {
@@ -261,9 +267,10 @@ private fun InsuredItem(
             modifier = Modifier.weight(0.5f)
         ) {
             Icon(
-                imageVector = Icons.Outlined.Info,
+                imageVector = Icons.Rounded.Info,
                 contentDescription = "more_info",
-                modifier = Modifier.size(60.dp)
+                modifier = Modifier.size(60.dp),
+                tint = MaterialTheme.colorScheme.surfaceTint
             );
         }
     }
@@ -284,8 +291,8 @@ private fun InsuredInfo(
 
         Text(
             text = "${insured.firstname} ${insured.lastname}",
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
+            fontSize = 20.sp,
+            fontFamily = theBoldFont
         );
         Row(){
             Text(
@@ -293,7 +300,9 @@ private fun InsuredInfo(
             );
             Text(
                 text = producerName,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                fontFamily = retrowFont,
+                fontSize = 15.sp
             );
         }
         if(!policyOf.isNullOrEmpty())

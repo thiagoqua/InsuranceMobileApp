@@ -33,7 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,6 +46,9 @@ import com.thiago.online.insurancesapp.ui.components.CircleLoader
 import com.thiago.online.insurancesapp.ui.components.ErrorText
 import com.thiago.online.insurancesapp.ui.components.Popup
 import com.thiago.online.insurancesapp.ui.theme.InsurancesAppTheme
+import com.thiago.online.insurancesapp.ui.theme.heavitasFont
+import com.thiago.online.insurancesapp.ui.theme.retrowFont
+import com.thiago.online.insurancesapp.ui.theme.theBoldFont
 import com.thiago.online.insurancesapp.viewmodel.DetailsViewModel
 
 public const val DetailsScreenName:String = "DETAILS_SCREEN";
@@ -99,8 +104,10 @@ public fun DetailsScreen(
 private fun DetailsAppBar(insured:Insured?) {
     TopAppBar(
         title = { Text(
-            text = appBarTitle.value,
-            color = Color.White
+            text = appBarTitle.value.toLowerCase(),
+            color = Color.White,
+            fontFamily = retrowFont,
+            fontSize = 35.sp
         ) },
         actions = {
             IconButton(
@@ -339,14 +346,16 @@ private fun InsuredDetailData(
         if(!value.isNullOrEmpty()) {
             Text(
                 text = label,
-                fontWeight = FontWeight.Bold,
                 modifier = modifier,
-                color = MaterialTheme.colorScheme.tertiary
+                color = MaterialTheme.colorScheme.tertiary,
+                fontFamily = theBoldFont,
+                textDecoration = TextDecoration.Underline
             );
             Text(
                 text = value,
-                fontWeight = FontWeight.Bold,
-                modifier = modifier
+                modifier = modifier,
+                fontFamily = theBoldFont,
+                color = MaterialTheme.colorScheme.surfaceVariant
             );
         }
         else {
@@ -354,7 +363,8 @@ private fun InsuredDetailData(
                 text = label,
                 modifier = modifier,
                 fontWeight = FontWeight.Bold,
-                color = Color.Gray
+                color = Color.Gray,
+                textDecoration = TextDecoration.LineThrough
             );
         }
     }
@@ -366,7 +376,7 @@ private fun DataTitle(text:String) {
         text = text,
         modifier = Modifier.padding(20.dp),
         fontSize = 30.sp,
-        fontWeight = FontWeight.ExtraBold,
-        color = MaterialTheme.colorScheme.tertiary
+        color = MaterialTheme.colorScheme.tertiary,
+        fontFamily = heavitasFont
     );
 }

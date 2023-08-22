@@ -1,11 +1,14 @@
 package com.thiago.online.insurancesapp.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +17,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +61,8 @@ fun LogInScreen(
 ){
     val viewModel:LoginViewModel = hiltViewModel<LoginViewModel>();
     val isLoading:Boolean = viewModel.loading_.observeAsState().value!!;
+
+    BackHandler(enabled = true) {}
 
     InsurancesAppTheme {
         Surface(
@@ -98,7 +107,8 @@ fun Form(
         Image(
             painter = painterResource(R.drawable.logo),
             contentDescription = "company_logo",
-            modifier = Modifier.fillMaxWidth(0.7f)
+            modifier = Modifier
+                .fillMaxWidth()
         )
         UsernameField(
             username,
@@ -128,9 +138,17 @@ fun Form(
             Button(
                 onClick = { viewModel.onLogIn(onSuccess,rememberUser.value) },
                 enabled = username.isNotEmpty() && password.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth(0.5f)
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .fillMaxHeight(0.4f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             ) {
-                Text(text = "Iniciar Sesión")
+                Text(
+                    text = "Iniciar Sesión",
+                    color = Color.White
+                );
             }
         }
     }
@@ -152,7 +170,8 @@ fun UsernameField(
         maxLines = 1,
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xFF000000),
-        )
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
     );
 }
 
@@ -183,7 +202,11 @@ fun PasswordField(
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         singleLine = true,
-        maxLines = 1
+        maxLines = 1,
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = Color(0xFF000000),
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
     )
 }
 
@@ -204,7 +227,10 @@ fun RememberUserField(
         Checkbox(
             checked = checked,
             enabled = enabled,
-            onCheckedChange = { newValue -> onValueChange(newValue) }
+            onCheckedChange = { newValue -> onValueChange(newValue) },
+            colors = CheckboxDefaults.colors(
+                checkedColor = MaterialTheme.colorScheme.tertiary
+            )
         );
     }
 }

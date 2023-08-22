@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
             val checkingUser:MutableState<Boolean> = remember{ mutableStateOf(true) }
             val navController = rememberNavController();
 
-            sharedPrefHandler.initializeWidth(this);
+            sharedPrefHandler.initializeWith(this);
 
             //starting page navigation
             NavHost(navController = navController, startDestination = LogInScreenName){
