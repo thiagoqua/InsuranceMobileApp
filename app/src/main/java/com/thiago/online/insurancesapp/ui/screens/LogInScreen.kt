@@ -108,7 +108,7 @@ fun Form(
             painter = painterResource(R.drawable.logo),
             contentDescription = "company_logo",
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(0.7f)
         )
         UsernameField(
             username,
@@ -139,15 +139,15 @@ fun Form(
                 onClick = { viewModel.onLogIn(onSuccess,rememberUser.value) },
                 enabled = username.isNotEmpty() && password.isNotEmpty(),
                 modifier = Modifier
-                    .fillMaxWidth(0.5f)
-                    .fillMaxHeight(0.4f),
+                    .fillMaxHeight(0.2f)
+                    .fillMaxWidth(0.7f),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Text(
                     text = "Iniciar Sesión",
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.surfaceVariant
                 );
             }
         }
@@ -169,7 +169,7 @@ fun UsernameField(
         singleLine = true,
         maxLines = 1,
         colors = TextFieldDefaults.textFieldColors(
-            textColor = Color(0xFF000000),
+            textColor = MaterialTheme.colorScheme.surfaceTint,
             containerColor = MaterialTheme.colorScheme.surface
         ),
     );
@@ -204,7 +204,7 @@ fun PasswordField(
         singleLine = true,
         maxLines = 1,
         colors = TextFieldDefaults.textFieldColors(
-            textColor = Color(0xFF000000),
+            textColor = MaterialTheme.colorScheme.surfaceTint,
             containerColor = MaterialTheme.colorScheme.surface
         ),
     )

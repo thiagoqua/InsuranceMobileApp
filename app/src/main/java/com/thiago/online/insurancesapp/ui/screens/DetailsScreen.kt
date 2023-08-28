@@ -349,7 +349,6 @@ private fun InsuredDetailData(
                 modifier = modifier,
                 color = MaterialTheme.colorScheme.tertiary,
                 fontFamily = theBoldFont,
-                textDecoration = TextDecoration.Underline
             );
             Text(
                 text = value,
