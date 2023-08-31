@@ -48,7 +48,7 @@ fun CompanyFilter(
                     text = selected.value,
                     modifier = Modifier.clickable(onClick = { expanded.value = true }),
                     color = if(selected.value != options[0]) MaterialTheme.colorScheme.primary
-                            else Color.Black
+                            else Color.Gray
                 );
                 IconButton(onClick = { expanded.value = true }) {
                     Icon(
@@ -99,7 +99,7 @@ fun ProducerFilter(
                     text = selected.value,
                     modifier = Modifier.clickable(onClick = { expanded.value = true }),
                     color = if(selected.value != options[0]) MaterialTheme.colorScheme.primary
-                            else Color.Black
+                            else Color.Gray
                 );
                 IconButton(onClick = { expanded.value = true }) {
                     Icon(
@@ -143,7 +143,7 @@ fun StatusFilter(onSelected: (String) -> Unit) {
                 text = selected.value,
                 modifier = Modifier.clickable(onClick = { expanded.value = true }),
                 color = if(selected.value != options[0]) MaterialTheme.colorScheme.primary
-                        else Color.Black
+                        else Color.Gray
             );
             IconButton(onClick = { expanded.value = true }) {
                 Icon(

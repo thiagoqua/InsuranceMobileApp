@@ -354,7 +354,7 @@ private fun InsuredDetailData(
                 text = value,
                 modifier = modifier,
                 fontFamily = theBoldFont,
-                color = MaterialTheme.colorScheme.surfaceVariant
+                color = MaterialTheme.colorScheme.surfaceTint
             );
         }
         else {
